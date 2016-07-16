@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LiquidPlannerPasticExtension.LiquidPlanner
+namespace LiquidPlannerPlasticExtension.LiquidPlanner
 {
     internal class Response
     {

@@ -8,13 +8,15 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-namespace LiquidPlannerPasticExtension.LiquidPlanner
+namespace LiquidPlannerPlasticExtension.LiquidPlanner
 {
     internal class LiquidPlannerConnection
     {
         public string Hostname { get; set; }
 
         private string password;
+
+        private Dictionary<int, Member> storedMembers;
 
         public string UserName { get; set; }
         public string Password { get { return null; } set { password = value; } }
@@ -24,6 +26,7 @@ namespace LiquidPlannerPasticExtension.LiquidPlanner
         {
             this.UserName = username;
             this.password = password;
+            this.storedMembers = new Dictionary<int, Member>();
         }
 
         public Response Get(string url)
@@ -109,7 +112,25 @@ namespace LiquidPlannerPasticExtension.LiquidPlanner
         /// <returns>Information of the logget user account</returns>
         public Member GetAccount()
         {
-            return GetObject<Member>(Get("/account"));
+            Member member = GetObject<Member>(Get("/account"));
+            this.storedMembers[member.Id] = member;
+            return member;
+        }
+
+        public Member GetMemberInfo(int memberId)
+        {
+            Member memberInfo;
+            if (! this.storedMembers.TryGetValue(memberId, out memberInfo))
+            {
+                memberInfo = GetObject<Member>(Get("/workspaces/" + this.WorkspaceId + "/members/" + memberId));
+                this.storedMembers[memberInfo.Id] = memberInfo;
+            }
+            return memberInfo;
+        }
+
+        public Member GetMemberInfo(string email)
+        {
+            return GetObject<Member>(Get("/workspaces/" + this.WorkspaceId + "/members/?filter[]=email = " + email));
         }
 
         public List<Workspace> GetWorkspaces()
@@ -124,7 +145,30 @@ namespace LiquidPlannerPasticExtension.LiquidPlanner
 
         public List<Item> GetTasks()
         {
-            return GetObject<List<Item>>(Get("workspaces/" + this.WorkspaceId + "/tasks"));
+            return GetObject<List<Item>>(Get("/workspaces/" + this.WorkspaceId + "/tasks"));
+        }
+        
+        public List<Item> GetNotClosedTasks(int id)
+        {
+            List<Item> result = new List<Item>();
+            var groups = GetObject<List<Group>>(Get("/workspaces/" + this.WorkspaceId + "/upcoming_tasks?member_id=" + id));
+            foreach(Group group in groups)
+            {
+                foreach(Item item in group.Items)
+                {
+                    if (!item.IsDone)
+                    {
+                        result.Add(item);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal Item GetTask(int taskId)
+        {
+            return GetObject<Item>(Get("/workspaces/" + this.WorkspaceId + "/tasks/" + taskId));
         }
 
         public Item CreateTask(BaseObject data)

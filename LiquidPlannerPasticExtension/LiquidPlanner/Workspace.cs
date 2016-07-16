@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace LiquidPlannerPasticExtension.LiquidPlanner
+namespace LiquidPlannerPlasticExtension.LiquidPlanner
 {
     [DataContract]
     internal class Workspace: BaseObject

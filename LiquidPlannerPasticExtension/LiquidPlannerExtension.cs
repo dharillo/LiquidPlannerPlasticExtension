@@ -4,36 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
+using LiquidPlannerPlasticExtension.LiquidPlanner;
+using System.Diagnostics;
 
 namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 {
     public class LiquidPlannerExtension : IPlasticIssueTrackerExtension
     {
         IssueTrackerConfiguration configuration;
+        LiquidPlannerConnection connection;
+        Member userInfo;
 
         /// <summary>
         /// Logger manager
         /// </summary>
         internal static readonly ILog logger = LogManager.GetLogger("liquidplannerextension");
 
-        internal static readonly string USER_KEY = "lp_userid";
-        internal static readonly string BRANCH_PREFIX_KEY = "lp_branchprefix";
+        internal static readonly string USER_KEY = "User";
+        internal static readonly string PASSWORD_KEY = "Password";
+        internal static readonly string BRANCH_PREFIX_KEY = "Branch prefix";
+        internal static readonly string WORKSPACE_KEY = "Workspace";
 
         internal LiquidPlannerExtension(IssueTrackerConfiguration config)
         {
             this.configuration = config;
+            this.userInfo = null;
+            this.connection = null;
+
             logger.Info("LiquidPlanner issue tracker is initialized");
         }
 
         #region IPlasticIssueTrackerExtension Implementation
         public void Connect()
         {
-            throw new NotImplementedException();
+            string user = configuration.GetValue(USER_KEY);
+            string password = configuration.GetValue(PASSWORD_KEY);
+            string workspaceId = configuration.GetValue(WORKSPACE_KEY);
+
+            connection = new LiquidPlannerConnection(user, password);
+
+            connection.WorkspaceId = Convert.ToInt32(workspaceId);
+
+            userInfo = connection.GetAccount();
         }
 
         public void Disconnect()
         {
-            throw new NotImplementedException();
+            connection = null;
         }
 
         public string GetExtensionName()
@@ -43,17 +60,26 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 
         public List<PlasticTask> GetPendingTasks()
         {
-            throw new NotImplementedException();
+            // FIXME Should return the task of all the members in the workspace.
+            return GetPendingTasks(userInfo.Email);
         }
 
         public List<PlasticTask> GetPendingTasks(string assignee)
         {
-            throw new NotImplementedException();
+            Member assigneeMember = userInfo;
+            if (assignee != userInfo.Email)
+            {
+                assigneeMember = connection.GetMemberInfo(assignee);
+            }
+            List<Item> tasks = connection.GetNotClosedTasks(assigneeMember.Id);
+
+            return tasks.Select((task) => BuildPlasticTask(task)).ToList();
         }
 
         public PlasticTask GetTaskForBranch(string fullBranchName)
         {
-            throw new NotImplementedException();
+            string taskId = GetTaskIdFromBranchName(GetBranchName(fullBranchName));
+            return LoadSingleTask(taskId);
         }
 
         public Dictionary<string, PlasticTask> GetTasksForBranches(List<string> fullBranchNames)
@@ -87,12 +113,27 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 
         public void OpenTaskExternally(string taskId)
         {
-            throw new NotImplementedException();
+            string workspaceId = configuration.GetValue(WORKSPACE_KEY);
+            Process.Start(string.Format("https://app.liquidplanner.com/space/{0}/projects/show/{1}", workspaceId, taskId));
         }
 
         public bool TestConnection(IssueTrackerConfiguration configuration)
         {
-            throw new NotImplementedException();
+            string user = configuration.GetValue(USER_KEY);
+            string password = configuration.GetValue(PASSWORD_KEY);
+            string workspaceId = configuration.GetValue(WORKSPACE_KEY);
+            var testConnection = new LiquidPlannerConnection(user, password);
+
+            Member account = null;
+            try
+            {
+                account = testConnection.GetAccount(); 
+            }
+            catch
+            {
+                return false;
+            }
+            return account != null;
         }
 
         public void UpdateLinkedTasksToChangeset(PlasticChangeset changeset, List<string> tasks)
@@ -129,7 +170,27 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 
         private PlasticTask LoadSingleTask(string taskId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(taskId))
+                return null;
+
+            Item task = connection.GetTask(Convert.ToInt32(taskId));
+            return BuildPlasticTask(task);
+        }
+
+        private PlasticTask BuildPlasticTask(Item task)
+        {
+            if (task == null)
+                return null;
+
+            Member creatorInfo = connection.GetMemberInfo(task.CreatorId);
+            return new PlasticTask()
+            {
+                Description = task.Description,
+                Title = task.Name,
+                Status = task.GetStatus(),
+                Id = Convert.ToString(task.Id),
+                Owner = /*task.CreatorId.ToString()*/creatorInfo.Name
+            };
         }
     }
 }

@@ -15,7 +15,9 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 
             ExtensionWorkingMode workingMode = GetWorkingMode(storedConfiguration);
             AddUserParam(storedConfiguration, parameters);
+            AddPasswordParam(storedConfiguration, parameters);
             AddBranchPrefixParam(storedConfiguration, parameters);
+            AddWorkspaceId(storedConfiguration, parameters);
 
             return new IssueTrackerConfiguration(workingMode, parameters);
         }
@@ -69,6 +71,19 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
             parameters.Add(userIdParam);
         }
 
+        private static void AddPasswordParam(IssueTrackerConfiguration storedConfiguration, List<IssueTrackerConfigurationParameter> parameters)
+        {
+            string password = GetValidParameterValue(storedConfiguration, LiquidPlannerExtension.PASSWORD_KEY, "");
+            IssueTrackerConfigurationParameter passwordParam = new IssueTrackerConfigurationParameter()
+            {
+                Name = LiquidPlannerExtension.PASSWORD_KEY,
+                Value = password,
+                Type = IssueTrackerConfigurationParameterType.Text,
+                IsGlobal = false
+            };
+            parameters.Add(passwordParam);
+        }
+
         /// <summary>
         /// Creates a valid value for the branchPrefix configuration parameter and adds it to the list
         /// of parameters given.
@@ -87,6 +102,19 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
                 IsGlobal = true
             };
             parameters.Add(branchPrefix);
+        }
+
+        private static void AddWorkspaceId(IssueTrackerConfiguration storedConfiguration, List<IssueTrackerConfigurationParameter> parameters)
+        {
+            string workspace = GetValidParameterValue(storedConfiguration, LiquidPlannerExtension.WORKSPACE_KEY, "0");
+            IssueTrackerConfigurationParameter workspaceParam = new IssueTrackerConfigurationParameter()
+            {
+                Name = LiquidPlannerExtension.WORKSPACE_KEY,
+                Value = workspace,
+                Type = IssueTrackerConfigurationParameterType.Text,
+                IsGlobal = true
+            };
+            parameters.Add(workspaceParam);
         }
 
         /// <summary>
