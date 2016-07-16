@@ -1,4 +1,8 @@
 # LiquidPlanner - Plastic SCM integration
+## Important:
+This project is still under development and a very early stage. Some functionalities
+will not work as expected.
+
 ## Installation
 ### Step 1:
 Right now, the project is configured to deploy directly on the usual installation
