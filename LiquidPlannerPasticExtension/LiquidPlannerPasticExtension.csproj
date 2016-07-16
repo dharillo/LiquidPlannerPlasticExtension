@@ -42,6 +42,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,6 +52,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LiquidPlannerExtension.cs" />
+    <Compile Include="LiquidPlannerExtensionFactory.cs" />
+    <Compile Include="LiquidPlanner\Assignment.cs" />
+    <Compile Include="LiquidPlanner\BaseObject.cs" />
+    <Compile Include="LiquidPlanner\Item.cs" />
+    <Compile Include="LiquidPlanner\LiquidPlannerConnection.cs" />
+    <Compile Include="LiquidPlanner\Member.cs" />
+    <Compile Include="LiquidPlanner\Response.cs" />
+    <Compile Include="LiquidPlanner\Workspace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
