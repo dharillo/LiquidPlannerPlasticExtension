@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 using LiquidPlannerPlasticExtension.LiquidPlanner;
 using System.Diagnostics;
+using Codice.Utils;
 
 namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 {
@@ -41,7 +42,7 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
             string password = configuration.GetValue(PASSWORD_KEY);
             string workspaceId = configuration.GetValue(WORKSPACE_KEY);
 
-            connection = new LiquidPlannerConnection(user, password);
+            connection = new LiquidPlannerConnection(user,GetDecryptedPassword(password));
 
             connection.WorkspaceId = Convert.ToInt32(workspaceId);
 
@@ -122,7 +123,7 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
             string user = configuration.GetValue(USER_KEY);
             string password = configuration.GetValue(PASSWORD_KEY);
             string workspaceId = configuration.GetValue(WORKSPACE_KEY);
-            var testConnection = new LiquidPlannerConnection(user, password);
+            var testConnection = new LiquidPlannerConnection(user, GetDecryptedPassword(password));
 
             Member account = null;
             try
@@ -191,6 +192,11 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
                 Id = Convert.ToString(task.Id),
                 Owner = /*task.CreatorId.ToString()*/creatorInfo.Name
             };
+        }
+
+        private string GetDecryptedPassword(string encryptedPassword)
+        {
+            return CryptoServices.GetDecryptedPassword(encryptedPassword);
         }
     }
 }

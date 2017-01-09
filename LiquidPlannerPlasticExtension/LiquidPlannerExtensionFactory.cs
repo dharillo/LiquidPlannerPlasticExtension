@@ -78,7 +78,7 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
             {
                 Name = LiquidPlannerExtension.PASSWORD_KEY,
                 Value = password,
-                Type = IssueTrackerConfigurationParameterType.Text,
+                Type = IssueTrackerConfigurationParameterType.Password,
                 IsGlobal = false
             };
             parameters.Add(passwordParam);
