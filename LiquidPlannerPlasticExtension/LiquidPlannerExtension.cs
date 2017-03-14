@@ -99,12 +99,23 @@ namespace Codice.Client.IssueTracker.LiquidPlannerExtension
 
         public List<PlasticTask> LoadTasks(List<string> taskIds)
         {
-            throw new NotImplementedException();
+            var plasticTasks = new List<PlasticTask>();
+            foreach(var taskId in taskIds)
+            {
+                plasticTasks.Add(LoadSingleTask(taskId));
+            }
+            return plasticTasks;
         }
 
         public void LogCheckinResult(PlasticChangeset changeset, List<PlasticTask> tasks)
         {
-            throw new NotImplementedException();
+            string newComment = string.Format("Checkin repository: {0}<br />Checkin ID: {1}<br />Checkin GUID: {2}<br />Checkin comment:<br /><p>{3}</p>",
+                changeset.Repository, changeset.Id, changeset.Guid, changeset.Comment);
+
+            foreach(var task in tasks)
+            {
+                connection.CreateComment(task.Id, newComment);
+            }
         }
 
         public void MarkTaskAsOpen(string taskId, string assignee)

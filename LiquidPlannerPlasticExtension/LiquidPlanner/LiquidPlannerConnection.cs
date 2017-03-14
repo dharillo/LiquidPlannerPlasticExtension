@@ -71,7 +71,7 @@ namespace LiquidPlannerPlasticExtension.LiquidPlanner
                 request.ContentType = "application/json";
                 string jsonPayload = JsonConvert.SerializeObject(data);
                 Console.WriteLine(jsonPayload);
-                byte[] jsonPayloadByteArray = Encoding.ASCII.GetBytes(jsonPayload.ToCharArray());
+                byte[] jsonPayloadByteArray = Encoding.UTF8.GetBytes(jsonPayload.ToCharArray());
                 using (Stream stream = request.GetRequestStream())
                 {
                     stream.Write(jsonPayloadByteArray, 0, jsonPayloadByteArray.Length);
@@ -177,6 +177,17 @@ namespace LiquidPlannerPlasticExtension.LiquidPlanner
                 {
                     task = data
                 }));
+        }
+
+        public Comment CreateComment(string taskId, string comment)
+        {
+            return GetObject<Comment>(Post("/workspaces/" + this.WorkspaceId + "/tasks/" + taskId + "/comments", new
+            {
+                comment = new
+                {
+                    comment = comment
+                }
+            }));
         }
 
         /// <summary>

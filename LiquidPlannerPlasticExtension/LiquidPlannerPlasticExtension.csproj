@@ -59,6 +59,7 @@
     <Compile Include="LiquidPlannerExtensionFactory.cs" />
     <Compile Include="LiquidPlanner\Assignment.cs" />
     <Compile Include="LiquidPlanner\BaseObject.cs" />
+    <Compile Include="LiquidPlanner\Comment.cs" />
     <Compile Include="LiquidPlanner\Group.cs" />
     <Compile Include="LiquidPlanner\Item.cs" />
     <Compile Include="LiquidPlanner\LiquidPlannerConnection.cs" />
